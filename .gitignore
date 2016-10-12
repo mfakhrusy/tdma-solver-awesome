@@ -1,0 +1,5 @@
+#compiled object files
+*.o
+
+#temp vi files
+*.swp
