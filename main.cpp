@@ -36,10 +36,17 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 
 
 	public:
-		std::vector<double> temperature_computation (double alpha, double delta_t, double delta_x) {
+		std::vector<double> temperature_computation (double alpha, 
+				double delta_t, 
+				double delta_x, 
+				double error_max,
+				double temperature_initial,
+				double temperature_final,
+				double N_iter_max,
+				double N_nodes) {
 
-			double B_constant = B_constant_computation(alpha, delta_t, delta_x);
-			double A_constant = A_constant_computation(alpha, delta_t, delta_x);
+			double B = B_constant_computation(alpha, delta_t, delta_x);
+			double A = A_constant_computation(alpha, delta_t, delta_x);
 
 			//initialize the vector by initial conditions 
 			temperature_spatial.push_back(temperature_initial);
@@ -52,17 +59,26 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 			temperature_time.push_back(temperature_spatial);
 
 			//looping process
+			double time_count = 0;
 			while (error_computation > error_max) {
+
 
 				//clear the temperature_spatial
 				temperature_spatial.clear();
+
 				//invoke boundary condition at initial
 				temperature_spatial.push_back(temperature_initial);
 				
 				//compute the 1-st node (initial = 0-th node!)
-				double temporary_temperature_computation;
-				temporary_temperature_computation = (temperature_initial - B_constant*temperature_initial)/(-1*A_constant);
+				double temp_temperature;
+				temp_temperature = (temperature_initial - B*temperature_initial)/(-A);
+				temperature_spatial.push_back(temp_temperature);
 				
+				//looping process
+				for (int i = 2; i<N_nodes_const; i++) {
+					temp_temperature = (temperature_time[time_count][2] + A*temperature_spatial[i-1] - B*temperature_spatial[i])/(-A);
+				}
+
 
 
 
@@ -72,10 +88,11 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				//add it to temperature_time
 				temperature_time.push_back(temperature_spatial);
 					
+				time_count = time_count + 1;
 			};
 
 
-			std::vector<double> temperature;
+			std::vector<double> temperature = temperature_spatial;
 			return temperature;
 		}
 
@@ -96,6 +113,14 @@ int main() {
 	par_1.N_iter_max		=	100;
 	par_1.N_nodes			=	10;
 
+	TDMA_SOLVER_DIRICHLET tdma_1;
+
+	std::vector<double> first = tdma_1.temperature_computation(par_1.alpha, par_1.delta_t, par_1.delta_x, par_1.error_max, par_1.temperature_initial, par_1.temperature_final, par_1.N_iter_max, par_1.N_nodes);
+
+	for (int i = 0; i<par_1.N_nodes; i++) {
+		std::cout << first[i] << std::endl;
+	
+	}
 
 
 
