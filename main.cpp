@@ -42,11 +42,12 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				double error_max,
 				double temperature_initial,
 				double temperature_final,
-				double N_iter_max,
-				double N_nodes) {
+				int N_iter_max,
+				int N_nodes_const) {
 
 			double B = B_constant_computation(alpha, delta_t, delta_x);
 			double A = A_constant_computation(alpha, delta_t, delta_x);
+
 
 			//initialize the vector by initial conditions 
 			temperature_spatial.push_back(temperature_initial);
@@ -55,11 +56,14 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 			}
 			temperature_spatial.push_back(temperature_final);
 
+
+
 			//initialize the temperature_time
 			temperature_time.push_back(temperature_spatial);
 
 			//looping process
 			double time_count = 0;
+			double error_computation = 1;
 			while (error_computation > error_max) {
 
 
@@ -81,14 +85,25 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 
 
 
-
 				//invoke boundary condition at final
 				temperature_spatial.push_back(temperature_final);
+				
+				std::cout << time_count << " INI TIME KE SEKINI " << std::endl;
+				for (int i=0; i<N_nodes_const; i++) {
+					std::cout << i << " " << temperature_spatial[i] << std::endl;
+				}
 
 				//add it to temperature_time
 				temperature_time.push_back(temperature_spatial);
-					
+				error_max = 0;
+				for (int i = 0; i <N_nodes_const; i++) {
+					error_max = (error_max + temperature_spatial[i])/N_nodes_const;		
+				}
 				time_count = time_count + 1;
+				if (time_count > 10) {
+					std::cout << "GAGAL" << std::endl;
+					break;
+				}
 			};
 
 
@@ -118,9 +133,10 @@ int main() {
 	std::vector<double> first = tdma_1.temperature_computation(par_1.alpha, par_1.delta_t, par_1.delta_x, par_1.error_max, par_1.temperature_initial, par_1.temperature_final, par_1.N_iter_max, par_1.N_nodes);
 
 	for (int i = 0; i<par_1.N_nodes; i++) {
-		std::cout << first[i] << std::endl;
+		std::cout << first[i] << "\t" ;
 	
 	}
+	std::cout << std::endl;
 
 
 
