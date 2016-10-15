@@ -19,8 +19,6 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 
 	private:
 		const int N_nodes_const = N_nodes;
-		//std::vector<std::vector<double>> temperature_time;	
-		//std::vector<double> temperature_spatial;
 		double error_computation;
 
 		//compute A constant
@@ -31,6 +29,23 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 		//compute B constant
 		double B_constant_computation (double alpha, double  delta_t, double delta_x) {
 			return ( 1 + (alpha*delta_t)/pow(delta_x,2) );
+		}
+		
+		//computa P and Q constant
+		double P_init_comp (double b_const, double c_const) {
+			return ( (c_const)/(b_const) );
+		}
+
+		double P_comp (double a_const, double b_const, double c_const, double P_before) {
+			return ( (c_const)/(b_const - a_const*P_before) );	
+		}
+
+		double Q_init_comp (double b_const, double d_const) {
+			return ( d_const/b_const );
+		}
+
+		double Q_comp (double a_const, double b_const, double d_const, double Q_before, double P_before) {
+			return ( (d_const - a_const*Q_before)/(b_const - a_const*P_before) );
 		}
 
 
@@ -49,6 +64,89 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 
 			double B = B_constant_computation(alpha, delta_t, delta_x);
 			double A = A_constant_computation(alpha, delta_t, delta_x);
+
+
+			//initialize the vector by initial conditions 
+			temperature_spatial[0] = temperature_initial;
+			for (int i=1; i<N_nodes_const-1; i++) {
+				temperature_spatial[i] = 0.;
+			}
+			temperature_spatial[N_nodes_const-1] = temperature_final;
+
+			//initialize the temperature_time
+			std::cout << "step[0]: ";
+			for (int i=0; i<N_nodes_const; i++) {
+				temperature_time[0][i] = temperature_spatial[i];
+				std::cout << temperature_time[0][i] << " ";
+			}
+			std::cout << std::endl;
+
+			int time_count = 0;
+			double error_computation = 0.;
+			std::vector<double> P(N_nodes_const);
+			std::vector<double> Q(N_nodes_const);
+
+			//looping process
+			do {
+
+				//compute P and Q constant
+				//first compute P, the initial, after that the whole P for N_nodes_const
+				P[0]	=	P_init_comp(B, A);
+				for (int i = 1; i<N_nodes_const; i++) {
+					P[i]	=	P_comp(A, B, A, P[i-1]);
+				}
+
+				//after that, compute Q from the initial until N_nodes_const
+				Q[0]	=	Q_init_comp(B, temperature_initial);
+				for (int i = 1; i<N_nodes_const; i++) {
+					Q[i]	=	Q_comp(A, B, temperature_time[time_count][i], Q[i-1], P[i-1]);
+				}
+	
+				//backward substitution for temperature
+				temperature_spatial[N_nodes_const - 1]	=	temperature_final;//Q[N_nodes_const - 1];
+				for (int i = N_nodes_const - 2; i >= 0; i-- ) {
+					temperature_spatial[i]	=	Q[i] - P[i]*temperature_spatial[i+1];
+				}
+
+				time_count = time_count + 1;
+				std::cout << "step[" << time_count<< "]: "; 
+				for (int i = 0; i<N_nodes_const; i++) {
+					std::cout << temperature_spatial[i] << " ";
+				}
+				std::cout << std::endl;
+
+
+				for (int i=0; i<N_nodes_const; i++) {
+					temperature_time[time_count][i] = temperature_spatial[i];
+				}
+
+				//compute error
+				for (int i = 0; i <N_nodes_const; i++) {
+					double temp = abs(temperature_time[time_count][i] - temperature_time[time_count - 1][i]);
+					error_computation = (error_computation + temp);		
+				}
+				error_computation = error_computation/N_nodes_const;
+	
+				if (time_count > 2) {
+					std::cout << "GAGAL" << std::endl;
+					break;
+				}
+
+
+			} while (error_computation > error_max);
+
+		return temperature_spatial;
+
+
+
+
+
+
+
+
+
+
+/*
 
 			//initialize the vector by initial conditions 
 			temperature_spatial[0] = temperature_initial;
@@ -70,8 +168,6 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 			}
 
 			//looping process
-			int time_count = 0;
-			double error_computation = 0.;
 			do {
 
 				//clear the temperature_spatial
@@ -124,6 +220,7 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 
 			std::vector<double> temperature = temperature_spatial;
 			return temperature;
+			*/
 		}
 };
 
