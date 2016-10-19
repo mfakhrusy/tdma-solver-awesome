@@ -83,31 +83,49 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 			//make the initial matrix
 			std::vector<std::vector<double>> the_matrix(N_nodes_const,std::vector<double>(N_nodes_const));
 
-			for (int j=0; j<N_nodes_const; j++) {	//vertical
-				for (int i=0; i<N_nodes_const; i++) {	//horizontal
+			for (int j=0; j<N_nodes_const; j++) {	//vertical -> rows
+				for (int i=0; i<N_nodes_const; i++) {	//horizontal -> columns
 
-					if (i == j) {
-
-						if (i == 0 && j == 0) {
-							the_matrix[j][i] = 1;
-						}
-						else if (i == (N_nodes_const-1) && j == (N_nodes_const-1)) {
-							the_matrix[j][i] = 1;
+					if (j == 0) {
+						if (i == 0) {
+							the_matrix[j][i]	=	1;
 						}
 						else {
-							the_matrix[j][i-1] 	= 	A;
-							the_matrix[j][i]	=	B;
-							the_matrix[j][i+1]	=	A;
+							the_matrix[j][i]	=	0;
 						}
 					}
+
+					else if (j == N_nodes_const - 1) {
+						if (i == N_nodes_const - 1) {
+							the_matrix[j][i]	=	1;
+						}
+						else {
+							the_matrix[j][i]	=	0;
+						}
+					}
+					
 					else {
-						the_matrix
+						if ( i == j ) {
+							the_matrix[j][i]	=	B;
+						}
+						else if (i == j-1 || i == j+1) {
+							the_matrix[j][i]	=	A;
+						}
+						else {
+							the_matrix[j][i] 	=	0;
+						}
 					}
 
 
 				}
 			}
-
+/*			for (int j=0; j<N_nodes_const; j++) {
+				for (int i=0; i<N_nodes_const; i++) {
+					std::cout << the_matrix[j][i] << "\t";
+				}
+				std::cout << std::endl;
+			}
+*/
 
 			int time_count = 0;
 			double error_computation = 0.;
@@ -136,6 +154,8 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				//	temperature_spatial[i]	=	Q[i] - P[i]*temperature_spatial[i+1];
 				//}
 
+
+				// ------------------------ do the gauss method ------------------
 				time_count = time_count + 1;
 				std::cout << "step[" << time_count<< "]: "; 
 				for (int i = 0; i<N_nodes_const; i++) {
@@ -188,10 +208,10 @@ int main() {
 
 	std::vector<double> first = tdma_1.temperature_computation(par_1.alpha, par_1.delta_t, par_1.delta_x, par_1.error_max, par_1.temperature_initial, par_1.temperature_final, par_1.N_iter_max, par_1.N_nodes);
 
-	for (int i = 0; i<par_1.N_nodes; i++) {
-		std::cout << first[i] << "\t\t" ;
-	
-	}
+//	for (int i = 0; i<par_1.N_nodes; i++) {
+//		std::cout << first[i] << "\t\t" ;
+//	
+//	}
 	std::cout << std::endl;
 
 
