@@ -109,7 +109,7 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 							the_matrix[j][i]	=	B;
 						}
 						else if (i == j-1 || i == j+1) {
-							the_matrix[j][i]	=	A;
+							the_matrix[j][i]	=	-A;
 						}
 						else {
 							the_matrix[j][i] 	=	0;
@@ -119,13 +119,13 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 
 				}
 			}
-/*			for (int j=0; j<N_nodes_const; j++) {
+			for (int j=0; j<N_nodes_const; j++) {
 				for (int i=0; i<N_nodes_const; i++) {
 					std::cout << the_matrix[j][i] << "\t";
 				}
 				std::cout << std::endl;
 			}
-*/
+
 
 			int time_count = 0;
 			double error_computation = 0.;
@@ -156,6 +156,30 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 
 
 				// ------------------------ do the gauss method ------------------
+				// first, make a bottom triangle matrix
+				for (int j = 1; j<N_nodes_const-1; j++) {
+					for (int i=0; i<N_nodes_const; i++) {
+						the_matrix[j][i] = the_matrix[j][i] - the_matrix[j][i-1]*(the_matrix[j-1][i]/the_matrix[j-1][j-1]);
+						//the above still wrong
+						//if (the_matrix[j][i] < 0.001 && the_matrix[j][i] > 0) {
+						//	the_matrix[j][i] = 0.;
+						//}
+
+					}
+				}
+				std::cout << "\nTIME COUNT: " << time_count << std::endl;
+				for (int j=0; j<N_nodes_const; j++) {
+					for (int i=0; i<N_nodes_const; i++) {
+						std::cout << the_matrix[j][i] << "\t";
+					}
+					std::cout << std::endl;
+				}
+
+				//do backward substitution
+//				temperature_spatial
+
+
+
 				time_count = time_count + 1;
 				std::cout << "step[" << time_count<< "]: "; 
 				for (int i = 0; i<N_nodes_const; i++) {
@@ -176,7 +200,7 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				error_computation = error_computation/N_nodes_const;
 				//std::cout << "ERRO: " <<error_computation << std::endl;
 	
-				if (time_count > 9) {
+				if (time_count > 1) {
 					std::cout << "GAGAL" << std::endl;
 					break;
 				}
