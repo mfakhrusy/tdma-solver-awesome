@@ -119,13 +119,13 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 
 				}
 			}
-			for (int j=0; j<N_nodes_const; j++) {
+/*			for (int j=0; j<N_nodes_const; j++) {
 				for (int i=0; i<N_nodes_const; i++) {
 					std::cout << the_matrix[j][i] << "\t";
 				}
 				std::cout << std::endl;
 			}
-
+*/
 
 			int time_count = 0;
 			double error_computation = 0.;
@@ -158,32 +158,31 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				// ------------------------ do the gauss method ------------------
 				// first, make a bottom triangle matrix
 				for (int j = 1; j<N_nodes_const-1; j++) {
+					double temp_const = the_matrix[j][j-1]/the_matrix[j-1][j-1];
 					for (int i=0; i<N_nodes_const; i++) {
-						the_matrix[j][i] = the_matrix[j][i] - the_matrix[j][i-1]*(the_matrix[j-1][i]/the_matrix[j-1][j-1]);
-						//the above still wrong
-						//if (the_matrix[j][i] < 0.001 && the_matrix[j][i] > 0) {
-						//	the_matrix[j][i] = 0.;
-						//}
-
+						the_matrix[j][i] = the_matrix[j][i] - the_matrix[j-1][i]*temp_const;
 					}
 				}
-				std::cout << "\nTIME COUNT: " << time_count << std::endl;
+				/*std::cout << "\nTIME COUNT: " << time_count << std::endl;
 				for (int j=0; j<N_nodes_const; j++) {
 					for (int i=0; i<N_nodes_const; i++) {
 						std::cout << the_matrix[j][i] << "\t";
 					}
 					std::cout << std::endl;
-				}
+				}*/
 
 				//do backward substitution
-//				temperature_spatial
+				temperature_spatial[N_nodes_const - 1] = temperature_final;
+				for (int i = N_nodes_const - 2; i>0; i--) {
+					temperature_spatial[i] = (temperature_time[time_count][i] - the_matrix[i][i+1]*temperature_spatial[i+1])/the_matrix[i][i];
+				}
 
 
 
 				time_count = time_count + 1;
 				std::cout << "step[" << time_count<< "]: "; 
 				for (int i = 0; i<N_nodes_const; i++) {
-					std::cout <<std::fixed<<std::setprecision(4) << temperature_spatial[i] << "\t\t";
+					std::cout <<std::fixed<<std::setprecision(4) << temperature_spatial[i] << "\t";
 				}
 				std::cout << std::endl;
 
@@ -200,7 +199,7 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				error_computation = error_computation/N_nodes_const;
 				//std::cout << "ERRO: " <<error_computation << std::endl;
 	
-				if (time_count > 1) {
+				if (time_count > 40) {
 					std::cout << "GAGAL" << std::endl;
 					break;
 				}
@@ -223,10 +222,10 @@ int main() {
 	par_1.delta_t			=	0.05;
 	par_1.delta_x			=	0.1;
 	par_1.error_max			=	0.00001;
-	par_1.temperature_initial	=	1;
+	par_1.temperature_initial	=	100;
 	par_1.temperature_final		=	300;
 	par_1.N_iter_max		=	100;
-	par_1.N_nodes			=	10;
+	par_1.N_nodes			=	20;
 
 	TDMA_SOLVER_DIRICHLET tdma_1;
 
