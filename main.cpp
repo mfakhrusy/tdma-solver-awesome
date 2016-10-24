@@ -287,7 +287,7 @@ int main() {
 	par_1.temperature_initial	=	4;
 	par_1.temperature_final		=	300;
 	par_1.N_iter_max		=	100;
-	par_1.N_nodes			=	8;
+	par_1.N_nodes			=	5;
 
 	TDMA_SOLVER_DIRICHLET tdma_1;
 
