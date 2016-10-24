@@ -134,7 +134,7 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 						the_matrix[j][i] = the_matrix[j][i] - the_matrix[j-1][i]*temp_const;
 					}
 
-					//do the same operation on x column and y column
+					//do the same operation on y column
 					temperature_temp[j] = temperature_temp[j] - temperature_temp[j-1]*temp_const;
 
 				}
@@ -210,7 +210,6 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				//build the y column
 				temperature_temp[0] = temperature_initial;
 				for (int i=1; i<N_nodes_const-1; i++) {
-		//			temperature_temp[i] = temperature_time[time_count-1][i];
 
 					if (i == 1) {
 						temperature_temp[i] = temperature_time[time_count][i] + A*temperature_initial;
@@ -233,10 +232,9 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 					error_computation = (error_computation + temp);		
 				}
 				error_computation = error_computation/N_nodes_const;
-				//std::cout << "ERRO: " <<error_computation << std::endl;
 	
-				if (time_count > 200) {
-					std::cout << "GAGAL" << std::endl;
+				if (time_count > N_iter_max) {
+					std::cout << "FAIL!!!" << std::endl;
 					break;
 				}
 
