@@ -117,14 +117,7 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 
 				}
 			}
-/*
-			for (int j=1; j<N_nodes_const-1; j++) {
-				for (int i=1; i<N_nodes_const-1; i++) {
-					std::cout << the_matrix[j][i] << "\t";
-				}
-				std::cout << std::endl;
-			}
-*/
+
 
 			int time_count = 0;
 			double error_computation = 0.;
@@ -143,27 +136,13 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 
 					//do the same operation on x column and y column
 					temperature_temp[j] = temperature_temp[j] - temperature_temp[j-1]*temp_const;
-//					std::cout << temperature_temp[j] << " ";
 
 				}
-//				std::cout << "WK" << std::endl;
-//				for (int j=0; j<N_nodes_const; j++) {
-//					std::cout << temperature_spatial[j] << " ";
-//				}
-//				std::cout << std::endl;
 
-/*				std::cout << "\nTIME COUNT: " << time_count << std::endl;
-				for (int j=1; j<N_nodes_const-1; j++) {
-					for (int i=1; i<N_nodes_const-1; i++) {
-						std::cout << the_matrix[j][i] << "\t";
-					}
-					std::cout << std::endl;
-				}
-*/
 				//do backward substitution
 				temperature_spatial[N_nodes_const - 1] 	= temperature_final;
 				temperature_spatial[0]			= temperature_initial;
-				temperature_spatial[N_nodes_const - 2]	= temperature_temp[N_nodes_const - 2];
+				temperature_spatial[N_nodes_const - 2]	= temperature_temp[N_nodes_const - 2]/the_matrix[N_nodes_const-2][N_nodes_const-2];
 				for (int i = N_nodes_const - 3; i>0; i--) {
 					//temperature_spatial[i] = (temperature_time[time_count][i] - the_matrix[i][i+1]*temperature_spatial[i+1])/the_matrix[i][i];
 					temperature_spatial[i] = (temperature_temp[i] - the_matrix[i][i+1]*temperature_spatial[i+1])/the_matrix[i][i];
@@ -234,13 +213,13 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 		//			temperature_temp[i] = temperature_time[time_count-1][i];
 
 					if (i == 1) {
-						temperature_temp[i] = temperature_time[time_count-1][i] + A*temperature_initial;
+						temperature_temp[i] = temperature_time[time_count][i] + A*temperature_initial;
 					}
 					else if (i == N_nodes_const-2) {
-						temperature_temp[i] = temperature_time[time_count-1][i] + A*temperature_final;
+						temperature_temp[i] = temperature_time[time_count][i] + A*temperature_final;
 					}
 					else {
-						temperature_temp[i] = temperature_time[time_count-1][i];
+						temperature_temp[i] = temperature_time[time_count][i];
 					}
 
 
@@ -248,8 +227,6 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				}
 				temperature_temp[N_nodes_const-1] = temperature_final;
 				
-
-
 				//compute error
 				for (int i = 0; i <N_nodes_const; i++) {
 					double temp = abs(temperature_time[time_count][i] - temperature_time[time_count - 1][i]);
@@ -258,12 +235,10 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				error_computation = error_computation/N_nodes_const;
 				//std::cout << "ERRO: " <<error_computation << std::endl;
 	
-				if (time_count > 10) {
+				if (time_count > 200) {
 					std::cout << "GAGAL" << std::endl;
 					break;
 				}
-
-
 
 
 
@@ -282,12 +257,12 @@ int main() {
 	//define input of par_1 object
 	par_1.alpha			=	0.1;
 	par_1.delta_t			=	0.05;
-	par_1.delta_x			=	0.1;
+	par_1.delta_x			=	0.05;
 	par_1.error_max			=	0.00001;
-	par_1.temperature_initial	=	4;
+	par_1.temperature_initial	=	10;
 	par_1.temperature_final		=	300;
 	par_1.N_iter_max		=	100;
-	par_1.N_nodes			=	5;
+	par_1.N_nodes			=	10;
 
 	TDMA_SOLVER_DIRICHLET tdma_1;
 
