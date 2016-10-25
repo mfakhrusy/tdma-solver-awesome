@@ -121,7 +121,6 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				}
 			}
 
-
 			int time_count = 0;
 			double error_computation = 0.;
 
@@ -132,14 +131,13 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				for (int j = 2; j<N_nodes_const-1; j++) {
 					double temp_const = the_matrix[j][j-1]/the_matrix[j-1][j-1];
 					
-					// first, make a bottom triangle matrix on A matrix
+					// first, make a upper triangle matrix on A matrix
 					for (int i=0; i<N_nodes_const; i++) {
 						the_matrix[j][i] = the_matrix[j][i] - the_matrix[j-1][i]*temp_const;
 					}
 
 					//do the same operation on y column
 					temperature_temp[j] = temperature_temp[j] - temperature_temp[j-1]*temp_const;
-
 				}
 
 				//do backward substitution, first initialize both edge with BC
@@ -164,7 +162,6 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 				for (int i=0; i<N_nodes_const; i++) {
 					temperature_time[time_count][i] = temperature_spatial[i];
 				}
-
 
 				// --------- BUILD NEW MATRIX -----------
 				for (int j=1; j<N_nodes_const-1; j++) {	//vertical -> rows
@@ -243,7 +240,6 @@ class TDMA_SOLVER_DIRICHLET: public Parameters {
 			} while (error_computation > error_max);
 
 		return temperature_spatial;
-
 		}
 };
 
@@ -256,10 +252,10 @@ int main() {
 	par_1.delta_t			=	0.05;
 	par_1.delta_x			=	0.05;
 	par_1.error_max			=	0.00001;
-	par_1.temperature_initial	=	1;
-	par_1.temperature_final		=	300;
+	par_1.temperature_initial	=	20;
+	par_1.temperature_final		=	1000;
 	par_1.N_iter_max		=	1000;
-	par_1.N_nodes			=	15;
+	par_1.N_nodes			=	20;
 
 	TDMA_SOLVER_DIRICHLET tdma_1;
 
